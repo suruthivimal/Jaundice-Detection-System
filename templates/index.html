@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="JaundiceCare - Instant image-based jaundice detection for newborns. Find nearby pediatricians and download reports.">
+  <title>JaundiceCare Portal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+</head>
+
+<body>
+
+  <!-- ✅ Navbar -->
+  <nav class="navbar">
+    <div class="logo">👶 JaundiceCare Portal</div>
+    <ul class="nav-links">
+      <li><a href="#detection">Home</a></li>
+      <li><a href="#hospitals-anchor" onclick="showHospitalSection()">Hospitals Map</a></li>
+    </ul>
+  </nav>
+
+  <!-- ✅ Main Dashboard Grid -->
+  <main class="dashboard-grid">
+
+    <!-- Left Column: Interactive Tools -->
+    <div class="main-column">
+
+      <!-- Jaundice Detection Form Card -->
+      <section id="detection" class="card">
+        <div class="card-header">
+          <h1>Jaundice Screening</h1>
+          <p>Scan forehead images for real-time bilirubin estimates.</p>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data" id="upload-form">
+          <div class="upload-dropzone" id="dropzone" onclick="document.getElementById('image-upload').click()">
+            <div class="dropzone-content">
+              <span class="upload-icon">📤</span>
+              <p class="upload-text">Drag & drop forehead image here, or <span class="browse-link">browse</span></p>
+              <p class="upload-hint">Supports PNG, JPG, JPEG (128x128 pixels)</p>
+            </div>
+            <input type="file" name="image" id="image-upload" onchange="previewImage(event)" required
+              style="display: none;">
+          </div>
+
+          <div id="image-preview-container"></div>
+
+          <button type="submit" id="predict-btn">🔍 Run Bilirubin Estimation</button>
+        </form>
+      </section>
+
+      <!-- Prediction Results Card (Conditional) -->
+      {% if prediction %}
+      <section id="prediction-result" class="card result-card animated-fade-in">
+        <div class="card-header">
+          <h2>Estimation Results</h2>
+          <p>Model output based on dermal pixel analysis.</p>
+        </div>
+
+        <div class="result-details">
+          <div class="result-badge-container">
+            <span class="result-label">Classification:</span>
+            <span class="badge {% if prediction == 'Jaundice' %}badge-danger{% else %}badge-success{% endif %}">
+              {{ prediction }}
+            </span>
+          </div>
+
+          {% if confidence is not none %}
+          <div class="confidence-bar-container">
+            <div class="confidence-meta">
+              <span>Bilirubin Probability:</span>
+              <strong>{{ "%.1f"|format(confidence * 100) }}%</strong>
+            </div>
+            <div class="confidence-bar">
+              <span style="width: {{ confidence * 100 }}%"
+                class="{% if prediction == 'Jaundice' %}bg-danger{% else %}bg-success{% endif %}"></span>
+            </div>
+          </div>
+          {% endif %}
+
+          <div class="result-image-wrapper">
+            <img src="{{ image_path }}" alt="Analyzed Infant Forehead Image" class="result-img">
+          </div>
+
+          {% if prediction == "Jaundice" %}
+          <div class="severity-card">
+            <div class="severity-header">
+              <span>⚠️ Status: <strong>{{ severity }} Severity</strong></span>
+            </div>
+            <p class="severity-desc"><strong>Recommendation:</strong> {{ recommendation }}</p>
+          </div>
+          {% endif %}
+
+          <a href="/download_report?prediction={{ prediction }}&confidence={{ confidence }}&severity={{ severity }}&recommendation={{ recommendation }}"
+            target="_blank" class="pdf-button">
+            📄 Generate Clinical Report PDF
+          </a>
+        </div>
+      </section>
+      {% endif %}
+
+      <!-- Hospital Search Section (Initially Hidden, linked via anchor) -->
+      <span id="hospitals-anchor"></span>
+      <div id="hospital-section" style="display: none;" class="animated-fade-in">
+        <section id="hospitals" class="card">
+          <div class="card-header">
+            <h2>🏥 Nearby Pediatricians & Hospitals</h2>
+            <p>Locate medical help within a 2km radius of your location.</p>
+          </div>
+
+          <div class="search-box">
+            <input type="text" id="locationInput" placeholder="Enter your city or area (e.g. Chennai)">
+            <button onclick="searchHospitals()" class="btn-search">Search Facilities</button>
+          </div>
+
+          <div id="map" style="width: 100%; height: 350px; border-radius: 16px; margin-top: 20px;"></div>
+          <div id="hospital-list"></div>
+        </section>
+      </div>
+
+    </div>
+
+    <!-- Right Column: Informative Panels -->
+    <div class="side-column">
+
+      <!-- Panel 1: Photo Guidelines -->
+      <section class="card info-card">
+        <h3>📸 Image Guidelines</h3>
+        <p class="info-intro">For the highest classification accuracy, please ensure your photo follows these protocols:
+        </p>
+        <ul class="guidelines-list">
+          <li>
+            <strong>Natural Lighting:</strong> Take photos in daylight. Avoid yellow indoor bulbs or direct smartphone
+            flash.
+          </li>
+          <li>
+            <strong>Focus & Position:</strong> Keep the forehead centered and capture it from straight-on, not at an
+            angle.
+          </li>
+          <li>
+            <strong>No Obstructions:</strong> Ensure there are no hairs, hats, or plasters covering the infant's
+            forehead.
+          </li>
+          <li>
+            <strong>Crop Area:</strong> Crop the image to show only the forehead skin, avoiding eyes or eyebrows.
+          </li>
+        </ul>
+      </section>
+
+      <!-- Panel 2: Understanding Jaundice -->
+      <section class="card info-card">
+        <h3>💡 Bilirubin & Jaundice</h3>
+        <p>Neonatal jaundice occurs when a baby has high levels of <strong>bilirubin</strong>, a yellow pigment produced
+          during normal breakdown of red blood cells.</p>
+        <p class="info-highlight">If bilirubin levels remain elevated and untreated, it can lead to complications.
+          Bilirubin dermally manifests as yellowing of skin and eyes.</p>
+        <p><em>JaundiceCare</em> acts as a preliminary screening mechanism to flag infants that require prompt clinical
+          pediatric consultation.</p>
+      </section>
+
+    </div>
+
+  </main>
+
+  <!-- ✅ Scripts -->
+  <script>
+    let mapInstance = null;
+
+    // Drag and Drop Handling
+    const dropzone = document.getElementById("dropzone");
+    const fileInput = document.getElementById("image-upload");
+
+    if (dropzone) {
+      ['dragenter', 'dragover'].forEach(eventName => {
+        dropzone.addEventListener(eventName, highlight, false);
+      });
+
+      ['dragleave', 'drop'].forEach(eventName => {
+        dropzone.addEventListener(eventName, unhighlight, false);
+      });
+
+      function highlight(e) {
+        e.preventDefault();
+        dropzone.classList.add('dragover');
+      }
+
+      function unhighlight(e) {
+        e.preventDefault();
+        dropzone.classList.remove('dragover');
+      }
+
+      dropzone.addEventListener('drop', handleDrop, false);
+
+      function handleDrop(e) {
+        let dt = e.dataTransfer;
+        let files = dt.files;
+
+        if (files.length > 0) {
+          fileInput.files = files;
+          previewImage({ target: fileInput });
+        }
+      }
+    }
+
+    function previewImage(event) {
+      const reader = new FileReader();
+      reader.onload = function () {
+        const previewContainer = document.getElementById("image-preview-container");
+        previewContainer.innerHTML = ""; // Clear any previous preview
+
+        const output = document.createElement("img");
+        output.src = reader.result;
+        output.style.marginTop = '20px';
+        output.style.width = '100%';
+        output.style.borderRadius = '12px';
+        previewContainer.appendChild(output);
+
+        // Scroll preview into view smoothly
+        previewContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+      if (event.target.files && event.target.files[0]) {
+        reader.readAsDataURL(event.target.files[0]);
+      }
+    }
+
+    function showHospitalSection() {
+      document.getElementById("hospital-section").style.display = "block";
+      document.getElementById("hospitals-anchor").scrollIntoView({ behavior: 'smooth' });
+
+      // Keep results visible on dashboard grid
+    }
+
+    function searchHospitals() {
+      const location = document.getElementById("locationInput").value;
+      if (!location) {
+        alert("Please enter a location.");
+        return;
+      }
+
+      fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${location}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.length > 0) {
+            const lat = data[0].lat;
+            const lon = data[0].lon;
+            loadHospitalMap(lat, lon);
+          } else {
+            alert("Location not found.");
+          }
+        });
+    }
+
+    function loadHospitalMap(lat, lon) {
+      if (mapInstance !== null) {
+        mapInstance.remove();
+      }
+
+      mapInstance = L.map('map').setView([lat, lon], 14);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(mapInstance);
+      L.marker([lat, lon]).addTo(mapInstance).bindPopup("Your searched location").openPopup();
+
+      const query = `
+        [out:json];
+        (
+          node["amenity"="hospital"](around:2000,${lat},${lon});
+          way["amenity"="hospital"](around:2000,${lat},${lon});
+          relation["amenity"="hospital"](around:2000,${lat},${lon});
+        );
+        out center;
+      `;
+
+      fetch("https://overpass-api.de/api/interpreter", {
+        method: "POST",
+        body: query
+      })
+        .then(res => res.json())
+        .then(data => {
+          const hospitals = data.elements;
+          const list = document.getElementById("hospital-list");
+          list.innerHTML = "<ul>";
+          if (hospitals.length === 0) {
+            list.innerHTML += "<li>📍 No pediatric facilities found within 2km.</li>";
+          }
+          hospitals.forEach(hospital => {
+            const name = hospital.tags.name || "Unnamed Hospital / Pediatrician";
+            const hlat = hospital.lat || hospital.center?.lat;
+            const hlon = hospital.lon || hospital.center?.lon;
+            if (hlat && hlon) {
+              L.marker([hlat, hlon]).addTo(mapInstance).bindPopup(name);
+            }
+            list.innerHTML += `<li>📍 ${name}</li>`;
+          });
+          list.innerHTML += "</ul>";
+        });
+    }
+  </script>
+
+  {% if prediction == "Jaundice" %}
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      document.getElementById("hospital-section").style.display = "block";
+    });
+  </script>
+  {% endif %}
+
+</body>
+
+</html>
