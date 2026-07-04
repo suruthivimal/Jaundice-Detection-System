@@ -80,15 +80,9 @@ http://127.0.0.1:5000/
 
 The homepage allows users to upload a newborn's forehead image for jaundice screening. It also provides image capture guidelines and information about neonatal jaundice.
 
-```text
-screenshots/Screenshot 2026-07-03 230921.png
-```
-
 Markdown:
 
-```markdown
-![Home Page](screenshots/Screenshot 2026-07-03 230921.png)
-```
+![Home Page](screenshots/Screenshot%202026-07-03%20230921.png)
 
 ---
 
