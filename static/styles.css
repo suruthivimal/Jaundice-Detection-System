@@ -1,0 +1,127 @@
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #e8f0fe;
+    margin: 0;
+    padding: 0;
+    background: var(--bg-color);
+    color: var(--text-color);
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #007bff;
+    color: white;
+    padding: 10px 30px;
+    font-size: 20px;
+}
+
+.logo {
+    font-weight: bold;
+}
+
+.nav-links {
+    list-style: none;
+    display: flex;
+    gap: 20px;
+}
+
+.nav-links li a {
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.container {
+    background: white;
+    margin: 40px auto;
+    padding: 30px;
+    max-width: 600px;
+    border-radius: 16px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    background: var(--card-bg);
+    color: var(--text-color);
+}
+
+h1, h2, h3, h4 {
+    color: #2c3e50;
+}
+
+input[type="file"],
+input[type="text"] {
+    padding: 12px;
+    border: 2px dashed #ccc;
+    border-radius: 10px;
+    width: 100%;
+    background-color: #f9f9f9;
+    margin: 20px 0;
+}
+
+button {
+    padding: 12px 30px;
+    background: linear-gradient(to right, #007bff, #00c6ff);
+    color: white;
+    border: none;
+    font-size: 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+button:hover {
+    background: linear-gradient(to right, #0056b3, #00aaff);
+}
+
+.result img {
+    margin-top: 15px;
+    width: 100%;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+}
+
+ul {
+    text-align: left;
+    padding-left: 20px;
+}
+
+.severity-box {
+  margin-top: 20px;
+  padding: 15px;
+  border-radius: 10px;
+  background-color: #fff3cd;
+  border: 1px solid #ffeeba;
+  color: #856404;
+  font-weight: 500;
+}
+
+@media (max-width: 600px) {
+  .navbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .nav-links {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .container {
+    padding: 20px;
+    margin: 20px;
+  }
+}
+
+.pdf-button {
+  display: inline-block;
+  margin-top: 15px;
+  padding: 10px 20px;
+  background-color: #28a745;
+  color: white;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.pdf-button:hover {
+  background-color: #218838;
+}

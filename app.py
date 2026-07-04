@@ -1,19 +1,29 @@
 from flask import Flask, render_template, request, send_file
+<<<<<<< HEAD
 from werkzeug.utils import secure_filename
 import io
+=======
+>>>>>>> 59b412c07deea0a4bffec3e37165cad5a1b6db1d
 from tensorflow.keras.models import load_model
 import numpy as np
 from PIL import Image
 import os
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
+<<<<<<< HEAD
 from reportlab.lib import colors
+=======
+>>>>>>> 59b412c07deea0a4bffec3e37165cad5a1b6db1d
 from datetime import datetime
 
 app = Flask(__name__)
 model = load_model('unet_jaundice_classifier.keras')
 
 UPLOAD_FOLDER = 'static/uploads'
+<<<<<<< HEAD
+=======
+REPORT_PATH = 'static/report.pdf'
+>>>>>>> 59b412c07deea0a4bffec3e37165cad5a1b6db1d
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 def preprocess_image(image_path, target_size=(128, 128)):
@@ -33,8 +43,12 @@ def index():
     if request.method == 'POST':
         image_file = request.files['image']
         if image_file:
+<<<<<<< HEAD
             filename = secure_filename(image_file.filename)
             path = os.path.join(UPLOAD_FOLDER, filename)
+=======
+            path = os.path.join(UPLOAD_FOLDER, image_file.filename)
+>>>>>>> 59b412c07deea0a4bffec3e37165cad5a1b6db1d
             image_file.save(path)
 
             img = preprocess_image(path)
@@ -76,6 +90,7 @@ def download_report():
     recommendation = request.args.get('recommendation', 'N/A')
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
+<<<<<<< HEAD
     buffer = io.BytesIO()
     c = canvas.Canvas(buffer, pagesize=letter)
 
@@ -199,6 +214,21 @@ def download_report():
         as_attachment=True,
         download_name=f"jaundice_report_{datetime.now().strftime('%Y%m%d%H%M%S')}.pdf"
     )
+=======
+    c = canvas.Canvas(REPORT_PATH, pagesize=letter)
+    c.setFont("Helvetica-Bold", 14)
+    c.drawString(100, 750, "🧾 Jaundice Detection Report")
+
+    c.setFont("Helvetica", 12)
+    c.drawString(100, 720, f"Prediction: {prediction}")
+    c.drawString(100, 700, f"Confidence: {float(confidence) * 100:.2f}%")
+    c.drawString(100, 680, f"Severity: {severity}")
+    c.drawString(100, 660, f"Recommendation: {recommendation}")
+    c.drawString(100, 640, f"Timestamp: {timestamp}")
+
+    c.save()
+    return send_file(REPORT_PATH, as_attachment=True)
+>>>>>>> 59b412c07deea0a4bffec3e37165cad5a1b6db1d
 
 if __name__ == '__main__':
     app.run(debug=True)

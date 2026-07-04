@@ -2,4 +2,7 @@ Flask
 tensorflow
 Pillow
 numpy
+<<<<<<< HEAD
 reportlab
+=======
+>>>>>>> 59b412c07deea0a4bffec3e37165cad5a1b6db1d
