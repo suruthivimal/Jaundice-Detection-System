@@ -90,9 +90,8 @@ Markdown:
 
 If the model predicts severe jaundice, the application helps users locate nearby pediatric hospitals based on their location.
 
-```markdown
-![Nearby Hospitals](screenshots/hospitals.png)
-```
+![Nearby Hospitals](screenshots/Screenshot%202026-07-03%20231056.png)
+
 
 ---
 
@@ -106,9 +105,7 @@ After prediction, the application generates a downloadable PDF medical report co
 - Severity level
 - Clinical recommendation
 
-```markdown
-![Diagnostic Report](screenshots/report.png)
-```
+![Diagnostic Report](screenshots/Screenshot%202026-07-03%20231110.png)
 
 ## 📎 Requirements
 
