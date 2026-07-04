@@ -74,15 +74,47 @@ http://127.0.0.1:5000/
 
 ---
 
-## 🖼️ How It Works
+## 📸 Application Screenshots
 
-* User uploads an image of a newborn.
-* Flask receives and preprocesses the image.
-* The CNN model (`jaundice_model.keras`) predicts the probability of jaundice.
-* The result is displayed in the browser.
-* If the child has jaundice (severe) it let you know the nearby hospitals.
+### 🏠 Home Page
+
+The homepage allows users to upload a newborn's forehead image for jaundice screening. It also provides image capture guidelines and information about neonatal jaundice.
+
+```text
+screenshots/home.png
+```
+
+Markdown:
+
+```markdown
+![Home Page](screenshots/home.png)
+```
 
 ---
+
+### 🏥 Nearby Hospitals
+
+If the model predicts severe jaundice, the application helps users locate nearby pediatric hospitals based on their location.
+
+```markdown
+![Nearby Hospitals](screenshots/hospitals.png)
+```
+
+---
+
+### 📄 Diagnostic Report
+
+After prediction, the application generates a downloadable PDF medical report containing:
+
+- Patient information
+- Classification result
+- Confidence score
+- Severity level
+- Clinical recommendation
+
+```markdown
+![Diagnostic Report](screenshots/report.png)
+```
 
 ## 📎 Requirements
 
